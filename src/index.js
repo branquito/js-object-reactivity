@@ -1,28 +1,29 @@
 import './styles.css';
-import { observe, notify } from './signals'
+import { observe, notify } from './signals';
 
 function Reactive(dataObj) {
   observeData(dataObj);
-  
+
   return {
     data: dataObj,
     observe,
     notify
-  }
-  
-  function makeReactive (obj, key) {
+  };
+
+  function makeReactive(obj, key) {
     let val = obj[key];
 
     Object.defineProperty(obj, key, {
       get() {
         return val;
       },
-      
-      set (newValue) {
-        val = newValue;
-        notify(key);
+
+      set(newValue) {
+        notify(key, {
+          newValue
+        });
       }
-    })
+    });
   }
 
   function observeData(obj) {
@@ -41,8 +42,12 @@ let data = {
 };
 
 const r = new Reactive(data);
-r.observe('firstName', () => console.log('First name has changed'));
-r.observe('firstName', () => console.log('I am also called when firstName has been changed'));
+r.observe('firstName', (payload) =>
+  console.log('First name has changed', payload)
+);
+r.observe('firstName', () =>
+  console.log('I am also called when firstName has been changed')
+);
 r.observe('age', () => console.log('Age has changed'));
 
 r.data.firstName = 'paco';
